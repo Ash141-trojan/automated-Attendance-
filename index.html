@@ -1,0 +1,367 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Automated Attendance System</title>
+
+  <!-- Bootstrap CSS -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Icons (optional) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+
+  <style>
+    body { background:#f4f6f9; color:#222; }
+    header { background: linear-gradient(90deg,#2c3e50,#34495e); color: #fff; padding: 2rem 1rem; }
+    .card { border: 0; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.06); }
+    .feature-box { transition: transform .18s ease, box-shadow .18s ease; }
+    .feature-box:hover { transform: translateY(-6px); box-shadow: 0 12px 30px rgba(0,0,0,0.08); }
+    #bleOutput { white-space: pre-wrap; font-family: monospace; }
+    .spinner-overlay { display:none; position:fixed; inset:0; background:rgba(255,255,255,0.7); z-index:1050; align-items:center; justify-content:center; }
+    .chart-card { min-height: 320px; }
+  </style>
+</head>
+<body>
+
+<header class="text-center">
+  <h1 class="mb-1">Automated Student Attendance System</h1>
+  <p class="mb-0">Smart Monitoring & Analytics for Colleges</p>
+</header>
+
+<nav class="navbar navbar-expand-lg navbar-dark" style="background:#34495e;">
+  <div class="container">
+    <a class="navbar-brand" href="#">Attendance</a>
+    <div class="collapse navbar-collapse">
+      <ul class="navbar-nav ms-auto">
+        <li class="nav-item"><a class="nav-link" href="#features">Features</a></li>
+        <li class="nav-item"><a class="nav-link" href="#ble">BLE Attendance</a></li>
+        <li class="nav-item"><a class="nav-link" href="#analytics">Analytics</a></li>
+        <li class="nav-item"><a class="nav-link" href="#contact">Contact</a></li>
+      </ul>
+    </div>
+  </div>
+</nav>
+
+<main class="container my-4">
+
+  <!-- Features -->
+  <section id="features" class="mb-4">
+    <div class="card p-4">
+      <h2>Key Features</h2>
+      <div class="row gy-3 mt-3">
+        <div class="col-md-4">
+          <div class="feature-box p-3 text-center bg-white rounded">
+            <i class="fa-solid fa-user-check fa-2x mb-2"></i>
+            <h5>Automated Attendance</h5>
+            <p class="mb-0">Quick & accurate logging without roll calls.</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="feature-box p-3 text-center bg-white rounded">
+            <i class="fa-solid fa-chart-line fa-2x mb-2"></i>
+            <h5>Analytics Dashboard</h5>
+            <p class="mb-0">Trends, daily summaries and filters.</p>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="feature-box p-3 text-center bg-white rounded">
+            <i class="fa-solid fa-bell fa-2x mb-2"></i>
+            <h5>Absentee Alerts</h5>
+            <p class="mb-0">Email / SMS alerts for low attendance (extendable).</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- BLE Section -->
+ <!-- BLE Section -->
+<!-- BLE Section -->
+<section id="ble" class="mb-4">
+  <div class="card p-4 text-center">
+    <h3>BLE Attendance</h3>
+    <p>Click below to start scanning for BLE devices.</p>
+    <button id="openScanner" class="btn btn-dark">🔍 Open BLE Scanner</button>
+
+    <div id="scannerArea" style="display:none; margin-top:20px;">
+      <button onclick="scanBLE()" class="btn btn-primary">Start Scan</button>
+      <pre id="bleOutput">No device scanned yet...</pre>
+    </div>
+  </div>
+</section>
+
+
+
+  <!-- Analytics -->
+  <section id="analytics" class="mb-4">
+    <div class="card p-4">
+      <h3>Analytics</h3>
+      <div class="row">
+        <div class="col-lg-8">
+          <div class="chart-card p-3 bg-white rounded">
+            <canvas id="attendanceChart" style="width:100%;height:320px;"></canvas>
+          </div>
+        </div>
+        <div class="col-lg-4">
+          <div class="p-3 bg-white rounded">
+            <h6>Last Marked Attendance</h6>
+            <pre id="lastAttendance" style="font-family:monospace; white-space:pre-wrap;">No records yet.</pre>
+            <button class="btn btn-sm btn-outline-secondary" onclick="loadLast()">Load latest</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact -->
+  <section id="contact" class="mb-4">
+    <div class="card p-4">
+      <h3>Contact</h3>
+      <p>Email: <a href="mailto:support@campus-attendance.com">support@campus-attendance.com</a></p>
+      <p>Phone: +91 </p>
+      <p>Address: College Innovation Hub, India</p>
+    </div>
+  </section>
+
+</main>
+
+<footer class="text-center py-3" style="background:#2c3e50; color:white;">
+  &copy; 2025 Automated Attendance Team
+</footer>
+
+<!-- Spinner overlay -->
+<!-- <div id="spinnerOverlay" class="spinner-overlay d-flex">
+  <div class="text-center">
+    <div class="spinner-border" role="status" style="width:72px;height:72px">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+    <div class="mt-2">Scanning for devices…</div>
+  </div>
+</div> -->
+
+<!-- Success/Error Modal -->
+<div class="modal fade" id="resultModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="resultTitle"></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body" id="resultBody"></div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Bootstrap JS & dependencies -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+
+<script>
+  // --- Configuration ---
+  // Change BASE_API to your backend URL (if hosting locally during dev use http://localhost:3000)
+  const BASE_API = (location.hostname === 'localhost' || location.hostname === '127.0.0.1') ? 'http://localhost:3000' : '';
+
+  // --- Utilities for UI ---
+  // const spinner = document.getElementById('spinnerOverlay');
+  const bleOutput = document.getElementById('bleOutput');
+  const resultModal = new bootstrap.Modal(document.getElementById('resultModal'));
+  const resultTitle = document.getElementById('resultTitle');
+  const resultBody = document.getElementById('resultBody');
+
+  function showSpinner() { spinner.style.display = 'flex'; }
+  function hideSpinner() { spinner.style.display = 'none'; }
+  function showResult(title, body) {
+    resultTitle.innerText = title;
+    resultBody.innerHTML = body;
+    resultModal.show();
+  }
+
+  // --- Chart ---
+  let attendanceChart = null;
+  async function loadStats() {
+    try {
+      const res = await fetch(BASE_API + '/api/attendance/stats');
+      if (!res.ok) throw new Error('Failed to load stats');
+      const data = await res.json();
+      renderChart(data);
+    } catch (err) {
+      console.error(err);
+      showResult('Error', 'Could not load analytics: ' + err.message);
+    }
+  }
+
+  function renderChart(data) {
+    const labels = data.map(d => d.date);
+    const counts = data.map(d => d.count);
+    const ctx = document.getElementById('attendanceChart');
+
+    if (attendanceChart) attendanceChart.destroy();
+    attendanceChart = new Chart(ctx, {
+      type: 'bar',
+      data: { labels, datasets: [{ label: 'Attendance per day', data: counts }] },
+      options: { responsive: true, maintainAspectRatio: false }
+    });
+  }
+
+  async function loadLast() {
+    try {
+      const res = await fetch(BASE_API + '/api/attendance?limit=1');
+      const arr = await res.json();
+      if (arr.length) {
+        const last = arr[0];
+        document.getElementById('lastAttendance').innerText = `${last.deviceName || 'Unnamed'} (${last.deviceId})\n${new Date(last.timestamp).toLocaleString()}\nBattery: ${last.battery ?? 'N/A'}%`;
+      } else {
+        document.getElementById('lastAttendance').innerText = 'No records yet.';
+      }
+    } catch (err) {
+      console.error(err);
+      document.getElementById('lastAttendance').innerText = 'Error loading latest.';
+    }
+  }
+
+  // --- BLE scanning (generic acceptAllDevices) ---
+  async function scanBLE() {
+    if (!navigator.bluetooth) {
+      showResult('Not supported', 'Your browser does not support Web Bluetooth API.');
+      return;
+    }
+
+    // showSpinner();
+    // bleOutput.innerText = 'Scanning for devices (open device chooser)...';
+
+    try {
+      const device = await navigator.bluetooth.requestDevice({
+        acceptAllDevices: true,
+        optionalServices: ['battery_service']
+      });
+
+      bleOutput.innerText = `Device selected: ${device.name || 'Unnamed'} (id: ${device.id})\nConnecting…`;
+      const server = await device.gatt.connect();
+      bleOutput.innerText += `\nConnected.`;
+
+      // try read battery if present
+      let battery = null;
+      try {
+        const service = await server.getPrimaryService('battery_service');
+        const char = await service.getCharacteristic('battery_level');
+        const value = await char.readValue();
+        battery = value.getUint8(0);
+      } catch (err) {
+        // battery not present or permission denied
+      }
+
+      // send to backend
+      const payload = {
+        deviceId: device.id,
+        deviceName: device.name,
+        timestamp: new Date().toISOString(),
+        battery
+      };
+
+      const resp = await fetch(BASE_API + '/api/attendance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!resp.ok) throw new Error('Server error when marking attendance');
+
+      const serverResp = await resp.json();
+      bleOutput.innerText += `\nAttendance marked: ${serverResp._id}\n${battery !== null ? 'Battery: ' + battery + '%' : 'Battery: N/A'}`;
+
+      showResult('Attendance marked', `Device: ${payload.deviceName || 'Unnamed'}<br/>Time: ${new Date(payload.timestamp).toLocaleString()}<br/>Battery: ${battery ?? 'N/A'}%`);
+      await loadStats();
+      await loadLast();
+
+      // disconnect when leaving page
+      window.addEventListener('beforeunload', () => { try { device.gatt.disconnect(); } catch(e){} });
+
+    } catch (err) {
+      console.error(err);
+      bleOutput.innerText = `Error: ${err.message || err}`;
+      showResult('Error', err.message || String(err));
+    } finally {
+      // hideSpinner();
+    }
+  }
+
+  // --- BLE scanning (filtered) --- change filters to match your beacon's advertised service or name
+  async function scanBLEFiltered() {
+    if (!navigator.bluetooth) {
+      showResult('Not supported', 'Your browser does not support Web Bluetooth API.');
+      return;
+    }
+
+    // Example: filter by namePrefix or service UUID (replace with your beacon values)
+    const FILTERS = [
+      // { namePrefix: 'CampusBeacon' },
+      // { services: ['0000ffe0-0000-1000-8000-00805f9b34fb'] } // custom service
+    ];
+
+    // showSpinner();
+    bleOutput.innerText = 'Opening device chooser (filtered)...';
+
+    try {
+      const opts = FILTERS.length ? { filters: FILTERS, optionalServices: ['battery_service'] } : { acceptAllDevices: true, optionalServices: ['battery_service'] };
+      const device = await navigator.bluetooth.requestDevice(opts);
+
+      // Reuse the same logic as scanBLE after selection
+      // Attempt to connect & send to backend
+      const server = await device.gatt.connect();
+      let battery = null;
+      try {
+        const service = await server.getPrimaryService('battery_service');
+        const char = await service.getCharacteristic('battery_level');
+        const value = await char.readValue();
+        battery = value.getUint8(0);
+      } catch(e) {}
+
+      const payload = {
+        deviceId: device.id,
+        deviceName: device.name,
+        timestamp: new Date().toISOString(),
+        battery
+      };
+
+      const resp = await fetch(BASE_API + '/api/attendance', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      if (!resp.ok) throw new Error('Server error when marking attendance');
+      const data = await resp.json();
+      bleOutput.innerText = `Attendance recorded: ${data._id}`;
+      showResult('Attendance marked', `Device: ${payload.deviceName || 'Unnamed'}<br/>Time: ${new Date(payload.timestamp).toLocaleString()}`);
+      await loadStats();
+      await loadLast();
+
+    } catch (err) {
+      console.error(err);
+      bleOutput.innerText = 'Error: ' + (err.message || err);
+      showResult('Error', err.message || String(err));
+    } finally {
+      // hideSpinner();
+    }
+  }
+
+  // init
+  (function init() {
+    loadStats();
+    loadLast();
+  })();
+
+  document.getElementById("openScanner").addEventListener("click", () => {
+  document.getElementById("scannerArea").style.display = "block";
+});
+
+</script>
+
+</body>
+</html>
